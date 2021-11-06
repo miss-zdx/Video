@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
+import com.liulishuo.filedownloader.FileDownloadSampleListener;
 import com.liulishuo.filedownloader.FileDownloader;
 
 import java.io.File;
@@ -18,20 +19,26 @@ public abstract class DownFileUtils {
             return;
         }
         FileDownloader.getImpl().create(url)
-                .setPath(path)
+                .setPath(path,false)
+                .setCallbackProgressTimes(300)
+                .setMinIntervalUpdateSpeed(400)
+                //.setCallbackProgressIgnored() //忽略所有回调，性能高点
+                .setAutoRetryTimes(1)
                 .setForceReDownload(true)
-                .setListener(new FileDownloadListener() {
+                .setListener(new FileDownloadSampleListener() {
                     //等待
                     @Override
                     protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-                        Log.d("zdx","开始下载  l1 ");
+                        Log.d("zdx","开始下载");
                     }
 
                     //下载进度回调
                     @Override
                     protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-                        Log.d("zdx","下载进度   " + (soFarBytes * 1.0 / 1.0 * totalBytes) * 100);
-                        onDownProgressUpdate(url, path, (int) ((soFarBytes * 1.0 / 1.0 * totalBytes) * 100));
+                        Log.d("zdx","soFarBytes =   " + soFarBytes);
+                        Log.d("zdx","totalBytes  =   " + totalBytes);
+                        Log.d("zdx","下载进度   " + (soFarBytes * 1.0) / (1.0 * totalBytes));
+                        onDownProgressUpdate(url, path, (int) ((soFarBytes * 1.0) / (1.0 * totalBytes) * 100));
                     }
 
                     //完成下载
@@ -39,8 +46,6 @@ public abstract class DownFileUtils {
                     protected void completed(BaseDownloadTask task) {
                         Log.d("zdx","下载成功");
                         onDownComplete(url, path);
-
-//                        searchDeviceByMacAndConnect();
                     }
 
                     //暂停
